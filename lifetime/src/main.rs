@@ -2,6 +2,22 @@ struct ImportantExcerpt<'a> {
 	part: &'a str,
 }
 
+// 메서드 라이프타임
+impl<'a> ImportantExcerpt<'a> {
+    // 라이프타임 생략 규칙
+    fn level(&self) -> i32 {
+        3
+    }    
+}
+
+impl<'a> ImportantExcerpt<'a> {
+    // fn announce_and_return_part<'b, 'c>(&'b self, announcement: &'c str) -> &'b str {
+    fn announce_and_return_part(&self, announcement: &str) -> &str { //< 라이프타임 생략규칙
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+
 fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
     if y.len() < x.len() {
         x
