@@ -15,6 +15,8 @@ impl Inventory {
         // unwrap_or_else() 인자에 클로저 함수 삽입 (표준 라이브러리에 우리가 정의한 함수를 전달)
         // 인자가 없기 때문에 || 사이에 아무런 값이 없음
         user_preferene.unwrap_or_else(|| self.most_stocked())
+
+        // unwrap_or_else()는 FnOnce() 트레이트 바운드를 클로저 함수에 적용
     }
 
     fn most_stocked(&self) -> ShirtColor {
@@ -30,11 +32,16 @@ impl Inventory {
 
         if num_blue < num_red {
             ShirtColor::Red
-        }
-        else {
+        } else {
             ShirtColor::Blue
         }
     }
+}
+
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
 }
 
 fn main() {
@@ -44,11 +51,17 @@ fn main() {
 
     let user_pref1 = Some(ShirtColor::Red);
     let giveaway1 = store.giveaway(user_pref1);
-    println!("The user with preference {:?} gets {:?}", user_pref1, giveaway1);
+    println!(
+        "The user with preference {:?} gets {:?}",
+        user_pref1, giveaway1
+    );
 
     let user_pref2 = None;
     let giveaway2 = store.giveaway(user_pref2);
-    println!("The user with preference {:?} gets {:?}", user_pref2, giveaway2);
+    println!(
+        "The user with preference {:?} gets {:?}",
+        user_pref2, giveaway2
+    );
 
     // 클로저의 타입 추론기능 사용
     let example_closure = |x| x;
@@ -82,12 +95,36 @@ fn main() {
     println!("After calling closure: {:?}", list2);
 
     // 소유권 이전
-    let list3 = vec![1,2 , 3];
+    let list3 = vec![1, 2, 3];
     println!("Before defining closure: {:?}", list3);
 
     // move 키워드는 클로저로 소유권을 넘기는 것
     // 메인 스레드와 소유권 참조하는 스레드 중 누가 먼저 죽을지 모르기 때문에 확실하게 이전하는게 나음
     thread::spawn(move || println!("from thread: {:?}", list3))
-    .join()
-    .unwrap();
+        .join()
+        .unwrap();
+
+    let mut list = [
+        Rectangle {
+            width: 10,
+            height: 1,
+        },
+        Rectangle {
+            width: 3,
+            height: 5,
+        },
+        Rectangle {
+            width: 7,
+            height: 12,
+        },
+    ];
+    let mut num_sort_operations = 0;
+    // sort_by_key()는 FnMut 트레이트 바운드의 클로저 사용
+    // FnOnce는 캡처된 값을 클로저 밖으로 보내버리기 때문에 단 한번만 호출이 가능함
+    // FnMut은 캡처된 값을 클로저 밖으로 보내지 않기 때문에 여러번 호출이 가능하고 캡처된 값을 변경시킬 수 있음
+    list.sort_by_key(|r| {
+        num_sort_operations += 1;
+        r.width
+    });
+    println!("{:#?}, sorted in {num_sort_operations} operations", list);
 }
