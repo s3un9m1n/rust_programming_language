@@ -1,0 +1,13 @@
+[package]
+name = "release_profile"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+// 최적화 수치는 0~3으로, 3일수록 컴파일 시간이 늘어나며 실행 시간이 단축됨
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
