@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+    "adder",
+    "add_one",
+]
+
+# 작업 공간 내의 크레이트들은 동일한 Cargo.lock과 출력 디렉토리를 공유함

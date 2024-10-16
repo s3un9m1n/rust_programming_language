@@ -1,0 +1,8 @@
+[package]
+name = "adder"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+add_one = {path="../add_one"}
+# Cargo에서는 작업 공간 내 크레이트들이 서로 의존할 것이라고 가정하지 ㅇ낳기 때문에 일일이 의존성 관계를 명시해야 함
