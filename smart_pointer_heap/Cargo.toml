@@ -1,0 +1,6 @@
+[package]
+name = "smart_pointer_heap"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
