@@ -23,10 +23,36 @@
 //! - RefCell<T>: 런타임에 검사되는 가변 대여를 허용. RefCell<T>이 불변일 때도 내부의 값 변경 가능
 //! 
 
-fn main() {
-    let x = 5;
-    // let y = &mut x; // 대여 규칙 위반
+/// Rc<T>와 RefCell<T> 조합해 가변 데이터 복수 소유자 만들기
+/// - Rc<T>는 복수의 불변 소유자 가능
+/// - RefCell<T>는 불변 소유자를 런타임에 가변으로 사용 가능
+/// - 따라서, RefCell<T>를 소유한 Rc<T>라면 복수의 가변 소유자 가능
+#[derive(Debug)]
+enum List {
+    Cons(Rc<RefCell<i32>>, Rc<List>),
+    Nil,
+}
 
-    // 어떤 값이 메서드 내부에서는 변경되지만, 다른 코드에서는 불변으로 보이게 할 때 유용
-    // ex. 목 객체
+use crate::List::{Cons, Nil};
+use std::cell::RefCell;
+use std::rc::Rc;
+
+fn main() {
+    let value = Rc::new(RefCell::new(5));
+
+    // Rc::clone을 통해 value의 소유권을 넘기거나 대여하는 것이 아닌,
+    // value와 a 모두 value에 대한 소유권을 가질 수 있도록 함
+    let a = Rc::new(Cons(Rc::clone(&value), Rc::new(Nil)));
+
+    // b와 c에서 모두 a에 대한 콘스 리스트 소유권을 가질 수 있음
+    let b = Cons(Rc::new(RefCell::new(3)), Rc::clone(&a));
+    let c = Cons(Rc::new(RefCell::new(4)), Rc::clone(&a));
+
+    // 가변 대여 + 역참조
+    // borrow_mut()은 RefMut<T> 스마트 포인터를 반환하는데, *를 통해 자동 역참조가 적용되어 내부 값을 접근
+    *value.borrow_mut() += 10;
+
+    println!("a after = {:?}", a);
+    println!("b after = {:?}", b);
+    println!("c after = {:?}", c);
 }
