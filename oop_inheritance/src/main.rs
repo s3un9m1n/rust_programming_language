@@ -4,6 +4,41 @@
 //!
 //! 러스트에는 상속이 없기 때문에 새로운 타입을 정의하고 확장할 수 있도록 구조화하는 다른 방법이 필요
 
+use oop_inheritance::{Button, Draw, Screen};
+
+// 우리의 라이브러리를 사용하는 누군가도 추가적으로 Draw 트레이트를 구현한 구조체를 만들 수 있음
+struct SelectBox {
+    width: u32,
+    height: u32,
+    options: Vec<String>,
+}
+
+impl Draw for SelectBox {
+    fn draw(&self) {
+        // 실제로 선택 상자를 그리는 코드
+    }
+}
+
 fn main() {
-    println!("Hello, world!");
+    // Screen 필드에 Button과 SelectBox도 포함될 수 있음 (Draw 트레이트를 구현했기 때문에)
+    let screen = Screen {
+        components: vec![
+            Box::new(SelectBox {
+                width: 75,
+                height: 10,
+                options: vec![
+                    String::from("Yes"),
+                    String::from("Maybe"),
+                    String::from("No"),
+                ],
+            }),
+            Box::new(Button {
+                width: 50,
+                height: 10,
+                label: String::from("OK"),
+            }),
+        ],
+    };
+
+    screen.run();
 }

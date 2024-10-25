@@ -43,6 +43,8 @@ pub struct Screen {
 // Screen 구조체에 run 메서드 정의
 impl Screen {
     // run 메서드는 components 각 요소마다 draw 메서드를 호출
+    // run 안에서는 각 컴포넌트가 어떤 구체 타입인지 알 필요가 없음
+    // 따라서, 런타임에 어떤 값이 특정 메서드를 구현했는지 검사할 필요가 없음 (컴파일 불가)
     pub fn run(&self) {
         for component in self.components.iter() {
             component.draw();
@@ -66,3 +68,17 @@ impl Screen {
 //         }
 //     }
 // }
+
+pub struct Button {
+    pub width: u32,
+    pub height: u32,
+    pub label: String,
+}
+
+// Button에서는 Draw 트레이트를 구현
+// Button에선는 Draw 트레이트 뿐 아니라 추가적인 impl을 통해 추가 메서드를 가질 수 잇음
+impl Draw for Button {
+    fn draw(&self) {
+        // 실제로 버튼을 그리는 코드
+    }
+}
