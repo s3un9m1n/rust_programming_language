@@ -57,4 +57,52 @@ fn main() {
 
     // 원시 포인터는 가변 포인터와 불변 포인터를 생성해 잠재적인 데이터 경합을 일으킬 수도 있음
     // 그럼에도 C 코드와 상호작용, 대여 검사기가 이해 못하는 안전한 추상화 구축과 같은 경우 필요
+
+    // unsafe 함수는 unsafe 블록 안에서만 호출 가능
+    // unsafe 블록 내에서 호출한다는 것은 해당 함수의 문서를 읽고 계약서를 준수할 책임이 있음을 의미
+    unsafe {
+        dangerous();
+    }
+
+    // 함수 안에 안전하지 않은 코드가 포함되어있다고 해서 함수 전체가 unsafe로 표시할 필요는 없음
+    // 안전하지 않은 코드를 안전한 함수로 감싸는 것이 일반적인 추상화
+    // ex. 안전하지 않은 코드가 약간 필요한 표준 라이브러리의 split_at_mut()
+    let mut v = vec![1, 2, 3, 4, 5, 6];
+
+    let r = &mut v[..];
+
+    let (a, b) = r.split_at_mut(3);
+
+    assert_eq!(a, &mut [1, 2, 3]);
+    assert_eq!(b, &mut [4, 5, 6]);
+}
+
+// unsafe 함수
+unsafe fn dangerous() {}
+
+use std::slice;
+
+// 예시를 위해 직접 함수로 구현
+// unsafe 함수가 아니며 안전한 코드에서도 호출할 수 있음
+fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
+    // i32에 대한 가변 슬라이스의 길이
+    let len = values.len();
+    // 슬라이스의 원시 포인터(*mut i32)
+    let ptr = values.as_mut_ptr();
+
+    assert!(mid <= len);
+
+    // 러스트 대여 검사기에서는 values의 서로 다른 부분을 대여하는 것을 이해하지 못함
+    // 다만 values를 두 번 대여한다는 것만 알고 있음
+    // 따라서 unsafe 동작 정의가 필요함
+    // (&mut values[..mid], &mut values[mid..])
+
+    // 원시포인터를 이용하기 때문에 포인터의 유효성 신뢰에 대해 안전하지 않음
+    unsafe {
+        (
+            // 원시포인터와 길이를 입력받아 슬라이스를 반환
+            slice::from_raw_parts_mut(ptr, mid),
+            slice::from_raw_parts_mut(ptr.add(mid), len - mid),
+        )
+    }
 }
