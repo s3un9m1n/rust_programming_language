@@ -132,3 +132,28 @@ extern "C" {
 pub extern "C" fn call_from_c() {
     println!("Just called a Rust function from C!");
 }
+
+
+// 러스트는 정적 변수를 지원하지만, 소유권 규칙과 문제(데이터 경합)가 발생할 수 있음
+// 전역 변수는 정적(static) 변수라 부름
+// 상수와 달리 정적 변수는 메모리에 고정된 주소를 가짐
+// 상수와 달리 정적 변수는 가변일 수 있음 (단, 가변 정적 변수에 접근 및 수정은 안전하지 ㅇ낳음)
+static HELLO_WORLD: &str = "Hello, world!";
+fn static_variable() {
+    println!("name is: {}", HELLO_WORLD);
+}
+
+static mut COUNTER: u32 = 0;
+fn add_to_count(inc: u32) {
+    unsafe {
+        COUNTER += inc;
+    }
+}
+
+fn add_to_count_caller() {
+    add_to_count(3);
+
+    unsafe {
+        println!("COUNTER: {}", COUNTER);
+    }
+}
