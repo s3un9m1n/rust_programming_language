@@ -157,3 +157,15 @@ fn add_to_count_caller() {
         println!("COUNTER: {}", COUNTER);
     }
 }
+
+/// 안전하지 않은 트레이트
+/// - 하나 이상의 메서드가 컴파일러가 확인할 수 없는 불변성(invariant)이 있는 경우
+unsafe trait Foo {
+    // 여기에 메소드가 작성됩니다
+}
+
+/// unsafe impl
+/// 컴파일러가 확인할 수 없는 불변성은 우리가 지키겠다는 약속
+unsafe impl Foo for i32 {
+    // 여기에 메소드 구현이 작성됩니다
+}
