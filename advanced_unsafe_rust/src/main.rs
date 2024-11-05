@@ -75,6 +75,14 @@ fn main() {
 
     assert_eq!(a, &mut [1, 2, 3]);
     assert_eq!(b, &mut [4, 5, 6]);
+
+
+    // extern 블록 내 선언된 함수는 unsafe
+    // 다른 언어가 러스트의 규착과 보증을 적용하지 않고, 러스트는 이를 확인할 수도 없어,
+    // 프로그래머가 안전을 보장할 책임이 있음
+    unsafe {
+        println!("Absolute value of -3 according to C: {}", abs(-3));
+    }
 }
 
 // unsafe 함수
@@ -105,4 +113,22 @@ fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
             slice::from_raw_parts_mut(ptr.add(mid), len - mid),
         )
     }
+}
+
+/// extern
+/// - 외래 함수 인터페이스(Foreign Function Interface, FFI)의 생성과 사용을 용이하게 하는 키워드
+/// - "C" 부분은 외부 함수가 사용하는 ABI(Application Binary Interface)를 정의 (어셈블리 수준에서 함수 호출하는 방법을 정의)
+///
+extern "C" {
+    fn abs(input: i32) -> i32;
+}
+
+/// 반대로 다른 언어세러 러스트 함수를 호출하기 위한 인터페이스를 만들 때
+/// - extern 키워드를 추가하고, 관련 함수에 대한 fn 키워드 앞에 사용할 ABI 지정
+/// - #[no_mangle] 어노테이션을 통해 컴파일러가 맹글링하지 않도록 지시
+///     > 맹글링: 함수에 부여한 이름을 컴파일러가 컴파일 과정에서 다른 부분에서 사용할 수 있도록 더 많은 정보를 포함하지만 사람이 읽기 불편한 이름으로 변경하는 것
+/// - 아래와 같이 외부 함수를 만들게 되면, 러스트 크레이트를 공유 라이브러리로 빌드하여, C 코드에서는 링크해 사용 가능
+#[no_mangle]
+pub extern "C" fn call_from_c() {
+    println!("Just called a Rust function from C!");
 }
