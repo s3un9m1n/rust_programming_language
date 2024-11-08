@@ -94,9 +94,52 @@ impl Add<Meters> for Millimeters {
     }
 }
 
+/// 모호성 방지를 위한 정규화 문법
+/// - 같은 이름의 메서드 호출하기
+///
+/// 러스트에서는 어떤 트레이트에 다른 트레이트의 메서드와 같은 이름의 메서드를 막지 ㅇ낳음
+/// 한 타입에서 두 트레이트를 모두 구현하는 것도 막지 않음
+/// 단, 같은 이름의 메서드를 호출할 때는 어떤 메서드를 사용할지 러스트에게 알려저야 함
+trait Pilot {
+    fn fly(&self);
+}
+
+trait Wizard {
+    fn fly(&self);
+}
+
+struct Human;
+
+impl Pilot for Human {
+    fn fly(&self) {
+        println!("This is your captain speaking.");
+    }
+}
+
+impl Wizard for Human {
+    fn fly(&self) {
+        println!("Up!");
+    }
+}
+
+impl Human {
+    fn fly(&self) {
+        println!("*waving arms furiously*");
+    }
+}
+
+
 fn main() {
     assert_eq!(
         Point { x: 1, y: 0 } + Point { x: 2, y: 3 },
         Point { x: 3, y: 3 }
     );
+
+    let person = Human;
+    // &self 인자가 주어져있어야만 호출 가능
+    // 혹은 정규화 문법을 통해서만 사용 가능
+    Pilot::fly(&person);
+    Wizard::fly(&person);
+    // Human::fly(&person)
+    person.fly();
 }
