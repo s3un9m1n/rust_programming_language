@@ -128,6 +128,37 @@ impl Human {
     }
 }
 
+/// 슈퍼트레이트
+/// 한 트레이트에서 다른 트레이트의 기능 구현 요구 (다른 트레이트에 의존)
+///
+/// 첫번째 트레이트를 구현하려면 두번째 트레이트도 구현하도록 요구
+/// -> 트레이트 정의가 두번째 트레이트의 연관 아이템을 활용 가능
+/// -> 슈퍼트레이트
+use std::fmt;
+
+// OutlinePrint 트레이트는 Display 트레이트를 필요하다 지정함
+trait OutlinePrint: fmt::Display {
+    fn outline_print(&self) {
+        // Display 트레이트의 to_string()을 OutlinePrint에서도 사용 가능
+        let output = self.to_string();
+        let len = output.len();
+        println!("{}", "*".repeat(len + 4));
+        println!("*{}*", " ".repeat(len + 2));
+        println!("* {} *", output);
+        println!("*{}*", " ".repeat(len + 2));
+        println!("{}", "*".repeat(len + 4));
+    }
+}
+
+// Display를 구현하지 않은 Point를 사용할 경우 빌드에 실패함
+impl OutlinePrint for Point {}
+
+// 아래의 코드로 Point에서도 Display를 구현했기 때문에 빌드에 성공함
+impl fmt::Display for Point {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
 
 fn main() {
     assert_eq!(
