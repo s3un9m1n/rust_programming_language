@@ -160,6 +160,27 @@ impl fmt::Display for Point {
     }
 }
 
+/// 뉴타입패턴
+/// 튜플 구조체(wrapper)로 새로운 타입을 생성하는 방법
+/// 고아 규칙(트레이트나 타입이 우리 크레이트의 것인 경우에만 트레이트 구현 가능)을 우회할 수 있음
+///
+/// -> wrapper 타입은 우리 크레이트 내에 있게 되어 래퍼에 대한 트레이트 구현 가능
+/// 런타임 성능 불이익은 없으며 컴파일 시 제거됨
+
+// Vec<T>에 대해 Display를 구현하고 싶을 경우
+// Display 트레이트와 Vec<T> 타입이 크레이트 외부에 정의되어 있으므로 직접 구현은 불가함
+// Vec<T> 인스턴스를 보유하는 Wrapper 구조체를 만들 경우, Wrapper에 Display를 구현하고 Vec<T>를 사용 가능
+// 즉, Vec<T>에 대한 Display 구현이 아닌, Wrapper에 대한 Display 구현으로 Vec<T>에 대한 Display 구현처럼 우회가능
+struct Wrapper(Vec<String>);
+
+impl fmt::Display for Wrapper {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Vec<T>의 0번째에 접근함
+        write!(f, "[{}]", self.0.join(", "))
+    }
+}
+
+
 fn main() {
     assert_eq!(
         Point { x: 1, y: 0 } + Point { x: 2, y: 3 },
@@ -173,4 +194,7 @@ fn main() {
     Wizard::fly(&person);
     // Human::fly(&person)
     person.fly();
+
+    let w = Wrapper(vec![String::from("hello"), String::from("world")]);
+    println!("w = {}", w);
 }
