@@ -5,3 +5,10 @@ version = 3
 [[package]]
 name = "advanced_macro"
 version = "0.1.0"
+dependencies = [
+ "hello_macro",
+]
+
+[[package]]
+name = "hello_macro"
+version = "0.1.0"

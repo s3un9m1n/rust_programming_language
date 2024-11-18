@@ -41,20 +41,20 @@ macro_rules! vec {
     };
 }
 
-/// 절차적 매크로
-/// - 선언적 매크로처럼 패턴에 매칭해서 다른 코드로 대체하는 것이 아니라, 어떤 코드를 입력받아 해당 코드에 대한 작업 수행 후 어던 코드를 출력 생성
-/// - 3가지 종류
-///   (1) 커스텀 파생(custon derive)
-///   (2) 속성형(attribute-like)
-///   (3) 함수형(function-like)
-/// - 특별한 형식을 가즌 자신만의 크레이트에 정의 필요
+// 절차적 매크로
+// - 선언적 매크로처럼 패턴에 매칭해서 다른 코드로 대체하는 것이 아니라, 어떤 코드를 입력받아 해당 코드에 대한 작업 수행 후 어던 코드를 출력 생성
+// - 3가지 종류
+//   (1) 커스텀 파생(custon derive)
+//   (2) 속성형(attribute-like)
+//   (3) 함수형(function-like)
+// - 특별한 형식을 가즌 자신만의 크레이트에 정의 필요
 
 // - `some_attribute`는 자리표시자 (예시이기 때문에 실제로는 존재하지 않는 이름 -> 빌드 불가)
 // `TokenStream`을 입력받아서 `TokenStream`을 출력으로 생성
 // `TokenStream`타입은 러스트의 `proc_macro` 크레이트에 정의되어 있으며, 토큰의 시퀀스를 나타냄
 // - 핵심: 매크로가 작동하는 소스코드가 입력을 `TokenStream`을 구성하고, 매크로가 생성하는 코드가 출력 `TokenStream`
-use proc_macro;
+// use proc_macro;
 
-#[some_attribute]
-pub fn some_name(input: TokenStream) -> TokenStream {
-}
+// #[some_attribute]
+// pub fn some_name(input: TokenStream) -> TokenStream {
+// }

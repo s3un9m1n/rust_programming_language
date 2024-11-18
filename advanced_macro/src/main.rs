@@ -30,4 +30,26 @@
 //! - `macro_rules!`: 매크로 정의 시 사용
 fn main() {
     println!("Hello, world!");
+    callDeriveMacro();
+}
+
+/// 커스텀 파생(derive) 매크로
+/// `HelloMacro` 이름의 트레이트와 `hello_macro` 연관 함수를 정의하는 `hello_macro`라는 이름의 크레이트를 만들자
+/// 사용자가 자신의 타입에 대해 `HelloMacro` 트레이트를 구현하도록 하는 대신,
+/// 절차적 매크로를 제공해 `#[derive(HelloMacro)]`라고 명시해 `hello_macro`함수의 기본 구현을 가져올 수 있도록 함
+/// 아래 예시의 기본 구현에서, `TypeName`은 이 트레이트가 정의된 타입의 이름임
+use hello_macro::HelloMacro;
+// use hello_macro_derive::HelloMacro;
+
+#[derive(HelloMacro)]
+struct Pancakes;
+
+// impl HelloMacro for Pancakes {
+//     fn hello_macro() {
+//         println!("Hello, Macro! My name is Pancakes!");
+//     }
+// }
+
+fn callDeriveMacro() {
+    Pancakes::hello_macro();
 }
