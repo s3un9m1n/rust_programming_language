@@ -53,3 +53,33 @@ struct Pancakes;
 fn callDeriveMacro() {
     Pancakes::hello_macro();
 }
+
+// 속성형 매크로
+// - 커스텀 파생 매크로와 비슷하지만 `derive` 속성에 대한 코드를 생성하는 대신 새 속성을 생성
+// - 즉, 커스텀 파생 매크로 보다 더 유연함(`derive` 속성은 구조체와 열거형에만 작동)
+// - 함수와 같은 다른 아이템에도 적용 가능
+// - 커스텀 파생 매크로와 동일하게 작동: `proc-macro` 크레이트 타입으로 크레이트 생성 및 원하는 코드 생성하는 함수 구현
+//
+// - `#[route]` 속성은 절차적 매크로로써 프레임워크에 의해 정의됨
+// #[route(GET, "/")]
+// fn index() {...}
+//
+// 매크로 정의 함수의 시그니처
+// 첫 번째 매개변수: 속성 <- `GET, "/"` 부분
+// 두 번째 매개변수: 속성이 연결된 아이템의 본문 <- `fn index() {...}`
+// #[proc_macro_attribute]
+// pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {...}
+
+// 함수형 매크로
+// - 함수 호출처럼 보이는 매크로를 정의
+// - `macro_rules!` 매크로와 유사
+// - 함수형 매크로는 함수보다 더 유연 (ex. 임의 개수의 인수 등)
+// - `TokenStream` 매개변수를 취하고, 정의는 다른 두 가지 종류의 절차적 매크로와 마찬가지로 러스트 코드를 사용
+//
+// ex. `sql!` 매크로
+// let sql = sql!(SELECT * FROm posts WHERE id=1);
+// - 위 매크로는 `macro_rules!` 매크로 보다 훨씬 더 복잡한 처리 가능 (SQL 파싱, 문법 검사)
+//
+// `sql!` 정의
+// #[proc_macro]
+// pub fn sql(input: TokenStream) -> TokenStream {...}
