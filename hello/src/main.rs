@@ -28,6 +28,9 @@ fn handle_connection(mut stream: TcpStream) {
         .take_while(|line| !line.is_empty()) // HTTP 종료 지점 확인 (HTTP는 연속된 두 번의 줄바꿈으로 HTTP 요청의 끝을 알림)
         .collect(); // 라인들을 벡터에 수집
 
-    // 수집된 라인을 디버그 형식을 사용해 출력
-    println!("Request: {:#?}", http_request);
+    let response = "HTTP/1.1 200 OK\r\n\r\n";
+
+    // `as_bytes()`: 문자열을 바이트로 변환
+    // `write_all()`: `&u[8]`을 받아 연결(`stream`)쪽으로 직접 보냄
+    stream.write_all(response.as_bytes()).unwrap();
 }
