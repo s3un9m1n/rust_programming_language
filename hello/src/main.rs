@@ -1,6 +1,7 @@
 //! 웹 서버 만들기
 //!
 use std::{
+    fs,
     io::{prelude::*, BufReader},
     net::{TcpListener, TcpStream},
 };
@@ -28,7 +29,12 @@ fn handle_connection(mut stream: TcpStream) {
         .take_while(|line| !line.is_empty()) // HTTP 종료 지점 확인 (HTTP는 연속된 두 번의 줄바꿈으로 HTTP 요청의 끝을 알림)
         .collect(); // 라인들을 벡터에 수집
 
-    let response = "HTTP/1.1 200 OK\r\n\r\n";
+    let status_line = "HTTP/1.1 200 OK";
+    let contents = fs::read_to_string("hello.html").unwrap();
+    let length = contents.len();
+
+    let response =
+        format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
 
     // `as_bytes()`: 문자열을 바이트로 변환
     // `write_all()`: `&u[8]`을 받아 연결(`stream`)쪽으로 직접 보냄
