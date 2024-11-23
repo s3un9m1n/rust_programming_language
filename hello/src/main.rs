@@ -28,27 +28,19 @@ fn handle_connection(mut stream: TcpStream) {
     // 두 번째 `unwrap`은 `Result`를 처리해 기존 `map`의 `unwrap`과 동일한 효과
     let request_line = buf_reader.lines().next().unwrap().unwrap();
 
-    if request_line == "GET / HTTP/1.1" {
-        let status_line = "HTTP/1.1 200 OK";
-        let contents = fs::read_to_string("hello.html").unwrap();
-        let length = contents.len();
-    
-        let response =
-            format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
-    
-        // `as_bytes()`: 문자열을 바이트로 변환
-        // `write_all()`: `&u[8]`을 받아 연결(`stream`)쪽으로 직접 보냄
-        stream.write_all(response.as_bytes()).unwrap();
-    }
-    else {
-        let status_line = "HTTP/1.1 404 NOT FOUND";
-        let contents = fs::read_to_string("404.html").unwrap();
-        let length = contents.len();
+    let (status_line, filename) = if request_line == "GET / HTTP/1.1" {
+        ("HTTP/1.1 200 OK", "hello.html")
+    } else {
+        ("HTTP/1.1 404 NOT FOUND", "404.html")
+    };
 
-        let response = format!(
-            "{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}"
-        );
+    let contents = fs::read_to_string(filename).unwrap();
+    let length = contents.len();
 
-        stream.write_all(response.as_bytes()).unwrap();
-    }
+    let response =
+        format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
+    
+    // `as_bytes()`: 문자열을 바이트로 변환
+    // `write_all()`: `&u[8]`을 받아 연결(`stream`)쪽으로 직접 보냄
+    stream.write_all(response.as_bytes()).unwrap();
 }
