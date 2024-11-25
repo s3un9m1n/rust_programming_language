@@ -1,8 +1,26 @@
-pub struct ThreadPool;
+use std::thread;
+
+pub struct ThreadPool {
+    threads: Vec<thread::JoinHandle<()>>,
+}
 
 impl ThreadPool {
+    /// Create a new ThreadPool.
+    /// The size is the number of threads in the pool.
+    ///
+    /// # Panics
+    ///
+    /// The `new` function will panic if the size is zero.
     pub fn new(size: usize) -> ThreadPool {
-        ThreadPool
+        assert!(size > 0);
+
+        let mut threads = Vec::with_capacity(size);
+
+        for _ in 0..size {
+            // create some threads and store them in the vector
+        }
+
+        ThreadPool { threads }
     }
 
     // 한 번만 호출될 것이기 때문에 `FnOnce` 가 사용되고자 하는 트레이트
