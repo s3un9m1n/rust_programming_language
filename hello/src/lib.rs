@@ -1,7 +1,8 @@
 use std::thread;
 
 pub struct ThreadPool {
-    threads: Vec<thread::JoinHandle<()>>,
+    // 각 worker에서 handle 인스턴스를 갖게 됨
+    workers: Vec<Worker>,
 }
 
 impl ThreadPool {
@@ -14,13 +15,15 @@ impl ThreadPool {
     pub fn new(size: usize) -> ThreadPool {
         assert!(size > 0);
 
-        let mut threads = Vec::with_capacity(size);
+        let mut workers = Vec::with_capacity(size);
 
-        for _ in 0..size {
-            // create some threads and store them in the vector
+        for id in 0..size {
+            // 스레드 실행을 먼저 한 뒤, 추후에 작업을 맡기고 싶음
+            // `thread::spawn`: 스레드 생성 후 즉시 실행
+            workers.push(Worker::new(id));
         }
 
-        ThreadPool { threads }
+        ThreadPool { workers }
     }
 
     // 한 번만 호출될 것이기 때문에 `FnOnce` 가 사용되고자 하는 트레이트
@@ -32,5 +35,19 @@ impl ThreadPool {
         F: FnOnce() + Send + 'static,
     {
 
+    }
+}
+
+struct Worker {
+    id: usize,
+    thread: thread::JoinHandle<()>,
+}
+
+impl Worker {
+    // 구현 세부사항을 ThreadPool 등에게 알릴 필요가 없어, 비공개
+    fn new(id: usize) -> Worker {
+        let thread = thread::spawn(|| {});
+
+        Worker { id, thread }
     }
 }
