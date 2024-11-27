@@ -62,9 +62,23 @@ impl ThreadPool {
     }
 }
 
+impl Drop for ThreadPool {
+    fn drop(&mut self) {
+        for worker in &mut self.workers {
+            println!("Shutting down worker {}", worker.id);
+
+            // `take`: `Some` 배리언트를 제거하고 그 자리에 `None`을 남김
+            // -> `take` 호출 시 `worker.thread`는 종료됨
+            if let Some(thread) = worker.thread.take() {
+                thread.join().unwrap();
+            }
+        }
+    }
+}
+
 struct Worker {
-    id: usize,                      // ID
-    thread: thread::JoinHandle<()>, // 실제 스레드
+    id: usize,                              // ID
+    thread: Option<thread::JoinHandle<()>>, // 실제 스레드 (작업을 하고 싶을 때는 `Some`, 작업을 종료하고 싶을 때는 `None`)
 }
 
 impl Worker {
@@ -91,6 +105,9 @@ impl Worker {
             job();
         });
 
-        Worker { id, thread }
+        Worker {
+            id,
+            thread: Some(thread),
+        }
     }
 }
