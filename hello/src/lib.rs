@@ -9,9 +9,8 @@ use std::{
 type Job = Box<dyn FnOnce() + Send + 'static>;
 
 pub struct ThreadPool {
-    // 각 worker에서 handle 인스턴스를 갖게 됨
-    workers: Vec<Worker>,      // `Worker` 스레드 풀
-    sender: mpsc::Sender<Job>, // 송신자
+    workers: Vec<Worker>,              // `Worker` 스레드 풀
+    sender: Option<mpsc::Sender<Job>>, // 송신자 (sender를 빼낼 수 있도록 변경할 것)
 }
 
 impl ThreadPool {
@@ -42,7 +41,10 @@ impl ThreadPool {
         }
 
         // 스레드 풀에 sender 등록
-        ThreadPool { workers, sender }
+        ThreadPool {
+            workers,
+            sender: Some(sender),
+        }
     }
 
     // 한 번만 호출될 것이기 때문에 `FnOnce` 가 사용되고자 하는 트레이트
@@ -58,12 +60,19 @@ impl ThreadPool {
         // `unwrap`: 전송 실패 시 종료
         // 사실, `ThreadPool`을 사용할 경우 모든 스레드의 실행이 중지되지는 않을 것이지만,
         // 컴파일러는 모르기 때문에 사용해야 함
-        self.sender.send(job).unwrap();
+        // `as_ref`:
+        self.sender.as_ref().unwrap().send(job).unwrap();
     }
 }
 
 impl Drop for ThreadPool {
     fn drop(&mut self) {
+        // `drop` 시 `ThreadPool`의 `sender`를 버리면,
+        // 채널이 닫히게 되어,
+        // `Worker`가 수행하는 `recv` 호출은 즉시 에러를 반환
+        // -> 종료되지 않고 `join`에서 블록킹되는 현상 방지
+        drop(self.sender.take());
+
         for worker in &mut self.workers {
             println!("Shutting down worker {}", worker.id);
 
@@ -98,11 +107,21 @@ impl Worker {
             // `unwrap`을 통해 패닉 유도
             // `recv`: 블록킹 방식으로 인해, 작업이 수신될 때까지 기다리게 될 것
             // 이때 `Mutex<T>` 덕분에 한 번에 하나의 `Worker`만 작업 요청 가능
-            let job = receiver.lock().unwrap().recv().unwrap();
+            // `recv`에 대한 `unwrap`을 지워, 예외 상황에 대해 아래에서 직접 처리
+            let message = receiver.lock().unwrap().recv();
 
-            println!("Worker {id} got a job; executing.");
+            match message {
+                Ok(job) => {
+                    println!("Worker {id} got a job; executing.");
 
-            job();
+                    job();
+                }
+                // 에러 발생 시 스레드가 종료되도록 변경
+                Err(_) => {
+                    println!("Worker {id} disconnected; shutting down.");
+                    break;
+                }
+            }
         });
 
         Worker {
